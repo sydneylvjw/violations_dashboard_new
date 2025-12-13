@@ -1,4 +1,4 @@
-export const mockDistricts = {
+{
     "type": "FeatureCollection",
     "name": "LI_DISTRICTS",
     "crs": {
@@ -20102,4 +20102,5 @@ export const mockDistricts = {
                 ]
             }
         }
-    ]};
+    ]
+}

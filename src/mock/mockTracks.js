@@ -7,7 +7,8 @@ export const mockTracks = {
       properties: {
         GEOID: "42101000100",
         median_income: 28000,
-        poverty_rate: 0.32
+        poverty_rate: 0.32,
+        "DISTRICT": "5"
       },
       geometry: {
         type: "Polygon",
