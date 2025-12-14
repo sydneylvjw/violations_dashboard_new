@@ -2,7 +2,8 @@
 
 import { GeoJSON } from "react-leaflet";
 import councilDistricts from "../../data/Council_Districts_2024.json";
-import inspectDistricts from "../../data/LI_DISTRICTS.json";
+const response = await fetch("/data/inspectPanel.json");
+const inspectDistricts = await response.json();
 import { useMemo } from "react";
 
 export default function DistrictBoundaries({ selectedDistrict }) {

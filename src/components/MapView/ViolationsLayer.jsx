@@ -3,9 +3,13 @@
 import { useMemo } from "react";
 import { GeoJSON } from "react-leaflet";
 import L from "leaflet";
-import councilPanel from "../../data/councilPanel.json";
-import inspectPanel from "../../data/inspectPanel.json";
-import tractPanel from "../../data/tractPanel.json";
+const response = await fetch("/data/inspectPanel.json");
+const inspectPanel = await response.json();
+const response2 = await fetch("/data/councilPanel.json");
+const councilPanel = await response2.json();
+const response3 = await fetch("/data/tractPanel.json");
+const tractPanel = await response3.json();
+
 
 export default function ViolationsLayer({ violationFilters }) {
   const vf = violationFilters || {};
