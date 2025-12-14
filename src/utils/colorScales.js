@@ -8,48 +8,64 @@
 // Simple, hand-rolled color scale for now.
 // You can swap this for d3-scale later.
 
-const incomeBreaks = [0, 25000, 40000, 60000, 80000, 100000];
 
-const incomeColors = [
-  "#f7fbff",
-  "#deebf7",
-  "#c6dbef",
-  "#9ecae1",
-  "#6baed6",
-  "#3182bd"
-];
 
-export const getColorScale = (variable) => {
-  // For now, we only know about "median_income"
-  // You can expand this later with a switch/case.
+const RAMP = ["#c1cbaf", "#9daaa0", "#664d50", "#b26c62", "#cec073"];
 
-  if (variable === "median_income") {
-    return (value) => {
-      if (value == null) return "#cccccc";
+export const getColorScale = (variable, features) => {
+  // collect the values for the selected ACS variable
+  const values = features
+    .map((f) => f.properties?.[variable])
+    .filter((v) => typeof v === "number" && !Number.isNaN(v));
 
-      for (let i = incomeBreaks.length - 1; i >= 0; i--) {
-        if (value >= incomeBreaks[i]) {
-          return incomeColors[i];
-        }
-      }
-      return incomeColors[0];
-    };
+  if (!values.length) {
+    // return the middle color as the baseline
+    return () => RAMP[Math.floor(RAMP.length / 2)];
   }
 
-  // Default: gray
-  return () => "#cccccc";
-}
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1; // prevent division by zero
 
-export function getLegendBins(variable) {
-  if (variable === "median_income") {
-    return incomeBreaks.map((b, i) => ({
-      label:
-        i === incomeBreaks.length - 1
-          ? `$${b}+`
-          : `$${b}–$${incomeBreaks[i + 1]}`,
-      color: incomeColors[i]
-    }));
+  return (value) => {
+    if (typeof value !== "number" || Number.isNaN(value)) {
+      return "#cccccc"; // default color for invalid / missing values
+    }
+
+    const t = (value - min) / range; // normalize to [0, 1]
+    // map t into discrete ramp indices 0..RAMP.length-1
+    const idx = Math.max(
+      0,
+      Math.min(RAMP.length - 1, Math.floor(t * (RAMP.length - 1)))
+    );
+    return RAMP[idx];
+  };
+};
+
+// Legend bins that match the same ramp
+export function getLegendBins(variable, features) {
+  const safeFeatures = Array.isArray(features) ? features : [];
+
+  const values = safeFeatures
+    .map((f) => f.properties?.[variable])
+    .filter((v) => typeof v === "number" && !Number.isNaN(v));
+
+  if (!values.length) return [];
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const step = (max - min) / RAMP.length || 1;
+
+  const bins = [];
+  for (let i = 0; i < RAMP.length; i++) {
+    const from = min + i * step;
+    const to = i === RAMP.length - 1 ? max : min + (i + 1) * step;
+    bins.push({
+      color: RAMP[i],
+      label: `${Math.round(from).toLocaleString()} – ${Math.round(
+        to
+      ).toLocaleString()}`,
+    });
   }
-
-  return [];
+  return bins;
 }

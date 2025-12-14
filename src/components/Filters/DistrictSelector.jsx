@@ -1,13 +1,20 @@
 // these are the components to render the selector to filter by council district
 
+// import ViolationFilters from "./ViolationFilters";
+
 const DISTRICTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 export default function DistrictSelector({ filters, setFilters }) {
   const handleChange = (e) => {
     const value = e.target.value ? Number(e.target.value) : null;
+
     setFilters((prev) => ({
       ...prev,
-      selectedDistrict: value
+      selectedDistrict: value,
+      violationFilters: {
+        ...prev.violationFilters,
+        COUNCILDIST: value ? String(value) : null,
+      }
     }));
   };
 

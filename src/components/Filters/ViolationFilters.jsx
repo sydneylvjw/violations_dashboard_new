@@ -2,7 +2,7 @@
 
 const YEARS = [
   2010, 2011, 2012, 2013, 2014, 2015, 2016,
-  2017, 2018, 2019, 2020, 2021, 2022, 2023
+  2017, 2018, 2019, 2020, 2021, 2022, 2023,
 ];
 
 const STATUSES = [
@@ -14,7 +14,7 @@ const STATUSES = [
   "STOP WORK",
   "SVN ISSUED, BALANCE DUE",
   "UNDER INVESTIGATION",
-  "UNSPECIFIED (no status)"
+  "UNSPECIFIED (no status)",
 ];
 
 const INSPECTDIST = [
@@ -22,7 +22,7 @@ const INSPECTDIST = [
   "CENTRAL EAST",
   "EAST",
   "SOUTH",
-  "CENTRAL WEST"
+  "CENTRAL WEST",
 ];
 
 const RESOLUTIONCODE = [
@@ -39,7 +39,7 @@ const RESOLUTIONCODE = [
   "CVN ISSUED",
   "SVN ISSUED",
   "WARNING ISSUED",
-  "UNRESOLVED (no status)"
+  "UNRESOLVED (no status)",
 ];
 
 const PRIORITY = [
@@ -53,22 +53,22 @@ const PRIORITY = [
   "UNSAFE",
   "HAZARDOUS",
   "IMMINENTLY DANGEROUS",
-  "UNSPECIFIED (no status)"
+  "UNSPECIFIED (no status)",
 ];
 
 export default function ViolationFilters({ filters, setFilters }) {
   const vf = filters.violationFilters;
 
   // YEARS -> filters.violationFilters.YEARS
-  const handleYearChange = (e) => {
-    const value = e.target.value ? Number(e.target.value) : null;
-    setFilters((prev) => ({
-      ...prev,
-      violationFilters: {
-        ...prev.violationFilters,
-        YEARS: value
-      }
-    }));
+const handleYearChange = (e) => {
+  const value = e.target.value ? Number(e.target.value) : null;
+  setFilters((prev) => ({
+    ...prev,
+    violationFilters: {
+      ...prev.violationFilters,
+      YEARS: value,
+    },
+  }));
   };
 
   // STATUSES -> filters.violationFilters.STATUSES (array)
@@ -84,8 +84,8 @@ export default function ViolationFilters({ filters, setFilters }) {
         ...prev,
         violationFilters: {
           ...prev.violationFilters,
-          STATUSES: updated
-        }
+          STATUSES: updated,
+        },
       };
     });
   };
@@ -97,8 +97,8 @@ export default function ViolationFilters({ filters, setFilters }) {
       ...prev,
       violationFilters: {
         ...prev.violationFilters,
-        INSPECTDIST: value
-      }
+        INSPECTDIST: value,
+      },
     }));
   };
 
@@ -109,8 +109,8 @@ export default function ViolationFilters({ filters, setFilters }) {
       ...prev,
       violationFilters: {
         ...prev.violationFilters,
-        RESOLUTIONCODE: value
-      }
+        RESOLUTIONCODE: value,
+      },
     }));
   };
 
@@ -121,8 +121,8 @@ export default function ViolationFilters({ filters, setFilters }) {
       ...prev,
       violationFilters: {
         ...prev.violationFilters,
-        PRIORITY: value
-      }
+        PRIORITY: value,
+      },
     }));
   };
 
@@ -147,7 +147,7 @@ export default function ViolationFilters({ filters, setFilters }) {
 
       {/* Status checkboxes */}
       <div style={{ marginTop: 8 }}>
-        <div>Status:</div>
+        <div>Violation Status:</div>
         {STATUSES.map((s) => (
           <label key={s} style={{ marginRight: 8 }}>
             <input
@@ -200,10 +200,7 @@ export default function ViolationFilters({ filters, setFilters }) {
       <div style={{ marginTop: 8 }}>
         <label>
           Case Priority:
-          <select
-            value={vf.PRIORITY || ""}
-            onChange={handlePriorityChange}
-          >
+          <select value={vf.PRIORITY || ""} onChange={handlePriorityChange}>
             <option value="">All priorities</option>
             {PRIORITY.map((y) => (
               <option key={y} value={y}>

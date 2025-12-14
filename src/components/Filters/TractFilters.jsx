@@ -66,10 +66,10 @@ export default function TractFilters({ filters, setFilters }) {
     <div className="filter-panel">
       <h3>Neighborhood characteristics</h3>
       <label>
-        Variable:
+        ACS Variable:
         <select value={filters.acsVariables} onChange={handleChange}>
           {ACSVARIABLES.map((v) => (
-            <option key={v.value} value={v.value}>
+            <option key={v.value} value={v.value} title={v.label}>
               {v.label}
             </option>
           ))}
