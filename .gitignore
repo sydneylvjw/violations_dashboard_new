@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+src/data/inspectPanel.json
+src/data/tractPanel.json
+src/data/councilPanel.json
