@@ -17,7 +17,7 @@ options(scipen = 999)
 
 library(pacman)
 
-p_load(dplyr, tidyverse, ggplot2, sf, dtplyr)
+p_load(dplyr, tidyverse, ggplot2, sf, dtplyr, tidycensus)
 
 ```
 
@@ -216,6 +216,32 @@ hist(councilPanel$councilDistZ)
 hist(ctPanel$tractViolsZ)
 hist(inspectPanel$inspectDistZ)
 
+# joining all by ct, district, council dist and year into one panel. Will drop the geom from councilPanel and inspectPanel first to keep it easy.
+# 
+# inspectDf <- inspectPanel %>% 
+#   st_drop_geometry()
+# 
+# councilDf <- councilPanel %>% 
+#   st_drop_geometry()
+# 
+# 
+# # full join to keep all rows from both datasets
+# violPanel <- ctPanel %>% 
+#   left_join(councilDf, by = c("violation_year", "censustract", "council_district", "inspect_district"))
+# #this keeps creating a bazillion rows, I'm going to remove the df and just move on and use them separately. No need to overcomplicate it.
+
+# transforming year, council dist into characters
+councilPanel <- councilPanel %>% 
+  mutate(violation_year = as.character(councilPanel$violation_year),
+         council_district = as.character(councilPanel$council_district))
+
+inspectPanel <- inspectPanel %>% 
+  mutate(violation_year = as.character(inspectPanel$violation_year),
+         council_district = as.character(inspectPanel$council_district))
+
+ctPanel <- ctPanel %>% 
+  mutate(violation_year = as.character(ctPanel$violation_year),
+         council_district = as.character(ctPanel$council_district))
 
 ```
 
@@ -274,6 +300,93 @@ acs <- get_multi_acs(
   output = "wide",
   geometry = T
 )
+
+# mutating columns for population and tenure percentages and standardized z-scores
+acs <- acs %>% 
+  mutate(pctWhite = popWhiteE / popTotE * 100,
+         pctBlack = popBlackE / popTotE * 100,
+         pctHisLat = popHispLatE / popTotE * 100,
+         pctAsian = popAsianE / popTotE * 100,
+         pctMixed = popMixedE / popTotE * 100,
+         pctOwnOcc = ownOccE / unitsTotE * 100,
+         pctRentOcc = rentOccE / unitsTotE * 100,
+         pctWhiteZ = scale(acs$pctWhite),
+         pctBlackZ = scale(acs$pctBlack),
+         pctHisLatZ = scale(acs$pctHisLat),
+         pctAsianZ = scale(acs$pctAsian),
+         pctMixedZ = scale(acs$pctMixed),
+         pctOwnOccZ = scale(acs$pctOwnOcc),
+         pctRentZ = scale(acs$pctRentOcc))
+
+# mutating out the last 6 digits of the geoid into a censustract column to match the panel info for easy joining
+acs <- acs %>% 
+  mutate(censustract = substr(GEOID, 6, 11))
+
+
+#trimming down to necessary columns only
+acsTrim <- acs %>% 
+  select(censustract,
+         NAME,
+         year,
+         popTotE,
+         popWhiteE,
+         pctWhite,
+         pctWhiteZ,
+         popBlackE,
+         pctBlack,
+         pctBlackZ,
+         popHispLatE,
+         pctHisLat,
+         pctHisLatZ,
+         popAsianE,
+         pctAsian,
+         pctAsianZ,
+         popMixedE,
+         pctMixed,
+         pctMixedZ,
+         medHHincE,
+         pctPovE,
+         medYrBuiltE,
+         unitsTotE,
+         avgHHsizeE,
+         ownOccE,
+         pctOwnOcc,
+         pctOwnOccZ,
+         ownOccAvgHHsizeE,
+         medSMOCAPIE,
+         rentOccE,
+         pctRentOcc,
+         pctRentZ,
+         rentOccAvgHHsizeE,
+         medGRAPIE
+         )
+
+
+
+```
+
+```{r exportData}
+# writing jsons of acs and panel data
+
+st_write(acs, 
+         "/Users/sydneyjoneswellborn/Documents/GitHub/JavaScript_6116/violations_dashboard/data/acs.json", 
+         driver = "geoJSON",
+         delete_dsn = T)
+
+st_write(ctPanel, 
+         "/Users/sydneyjoneswellborn/Documents/GitHub/JavaScript_6116/violations_dashboard/data/tractPanel.json", 
+         driver = "geoJSON",
+         delete_dsn = T)
+
+st_write(inspectPanel, 
+         "/Users/sydneyjoneswellborn/Documents/GitHub/JavaScript_6116/violations_dashboard/data/inspectPanel.json", 
+         driver = "geoJSON",
+         delete_dsn = T)
+
+st_write(councilPanel, 
+         "/Users/sydneyjoneswellborn/Documents/GitHub/JavaScript_6116/violations_dashboard/data/councilPanel.json", 
+         driver = "geoJSON",
+         delete_dsn = T)
 
 ```
 

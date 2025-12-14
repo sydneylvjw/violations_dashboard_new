@@ -1,31 +1,88 @@
 // these are the components to render filterable district boundaries on the map
 
 import { GeoJSON } from "react-leaflet";
-import { mockDistricts } from "../../mock/mockDistricts";
+import councilDistricts from "../../data/Council_Districts_2024.json";
+import inspectDistricts from "../../data/LI_DISTRICTS.json";
+import { useMemo } from "react";
 
 export default function DistrictBoundaries({ selectedDistrict }) {
-  const districtData = mockDistricts; // later: replace with real data
+  // // combine both district datasets
+  // const districtData = {
+  //   type: "FeatureCollection",
+  //   features: [
+  //     ...councilDistricts.features,
+  //     ...inspectDistricts.features
+  //   ]
+  // };
+  const mergedData = useMemo(() => {
+    const features = [];
+    if (councilDistricts?.features) features.push(...councilDistricts.features);
+    if (inspectDistricts?.features) features.push(...inspectDistricts.features);
+    return { type: "FeatureCollection", features };
+  }, []);
 
-  const style = (feature) => {
-    const isSelected =
-      selectedDistrict && feature.properties.district === selectedDistrict;
+  const selectedStr = selectedDistrict != null ? String(selectedDistrict) : null;
 
-    return {
-      color: isSelected ? "#ffcc00" : "#555555",
-      weight: isSelected ? 3 : 1,
-      fillOpacity: 0,
-      dashArray: "4"
-    };
-  };
+  const styleFn = useMemo(
+    () => (feature) => {
+      const dist = feature.properties?.DISTRICT
+        ? String(feature.properties.DISTRICT)
+        : null;
 
-  const onEachFeature = (feature, layer) => {
-    layer.bindTooltip(
-      `District ${feature.properties.district}: ${feature.properties.name}`,
-      { sticky: true }
-    );
-  };
+      const isSelected = selectedStr && dist === selectedStr;
+
+      return {
+        weight: isSelected ? 3 : 1,
+        color: isSelected ? "#ff9900" : "#444",
+        fill: false
+      };
+    },
+    [selectedStr]
+  );
 
   return (
-    <GeoJSON data={districtData} style={style} onEachFeature={onEachFeature} />
+    <GeoJSON
+      data={mergedData}
+      style={styleFn}
+      onEachFeature={(feature, layer) => {
+        const dist = feature.properties?.DISTRICT;
+        if (dist != null) {
+          layer.bindTooltip(`District ${dist}`, { sticky: true });
+        }
+      }}
+    />
   );
 }
+
+//   const style = (feature) => {
+//     const districtProp = feature.properties.DISTRICT;
+//     const selectedStr =
+//       selectedDistrict != null ? String(selectedDistrict) : null;
+
+//     const isSelected =
+//       selectedStr && districtProp === selectedStr;
+
+//     return {
+//       color: isSelected ? "#ffcc00" : "#555555",
+//       weight: isSelected ? 3 : 1,
+//       fillOpacity: 0,
+//       dashArray: "4"
+//     };
+//   };
+
+//   const onEachFeature = (feature, layer) => {
+//     const districtProp = feature.properties.DISTRICT;
+//     layer.bindTooltip(
+//       `District ${districtProp}`,
+//       { sticky: true }
+//     );
+//   };
+
+//   return (
+//     <GeoJSON
+//       data={districtData}
+//       style={style}
+//       onEachFeature={onEachFeature}
+//     />
+//   );
+// }

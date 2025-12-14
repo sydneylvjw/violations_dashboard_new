@@ -6,14 +6,28 @@ import ViolationFilters from "./components/Filters/ViolationFilters";
 import TractFilters from "./components/Filters/TractFilters";
 import DistrictSelector from "./components/Filters/DistrictSelector";
 
+
+// debounce hook for memory optimization
+// function useDebouncedValue(value, delay) {
+//   const [debounced, setDebounced] = useState(value);
+
+//   useMemo(() => {
+//     const id = setTimeout(() => setDebounced(value), delay);
+//     return () => clearTimeout(id);
+//   }, [value, delay]);
+
+//   return debounced;
+// }
 export default function App() {
   const [filters, setFilters] = useState({
     selectedDistrict: null,
-    acsVariable: "median_income",
+    acsVariables: "medHHincE",
     violationFilters: {
-      year: null,
-      status: [],
-      subcode: null,
+      YEARS: null,          // single year or null
+      STATUSES: [],         // array (checkbox list)
+      INSPECTDIST: null,    // single district or null
+      RESOLUTIONCODE: null, // single code or null
+      PRIORITY: null,       // single priority or null
     },
   });
 
