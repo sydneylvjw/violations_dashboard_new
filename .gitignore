@@ -25,3 +25,6 @@ dist-ssr
 src/data/inspectPanel.json
 src/data/tractPanel.json
 src/data/councilPanel.json
+public/data/inspectPanel.json
+public/data/tractPanel.json
+public/data/councilPanel.json
