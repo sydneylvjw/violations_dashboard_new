@@ -10,7 +10,7 @@
 
 
 
-const RAMP = ["#c1cbaf", "#9daaa0", "#664d50", "#b26c62", "#cec073"];
+const RAMP = ["#664d50", "#b26c62", "#cec073", "#c1cbaf", "#f5f4c2"];
 
 export const getColorScale = (variable, features) => {
   // collect the values for the selected ACS variable

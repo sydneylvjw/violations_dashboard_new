@@ -45,6 +45,15 @@ export default function Legend({ acsVariables }) {
     () => getLegendBins(acsVariables, acsPanel.features),
     [acsVariables]
   );
+
+  const hasNoData = useMemo(
+    () =>
+      acsPanel.features.some((f) => {
+        const val = f.properties?.[acsVariables];
+        return val === null || val === undefined || Number.isNaN(val);
+      }),
+    [acsVariables]
+  );
   if (!bins.length) return null;
 
   const selected = ACSVARIABLES.find((v) => v.value === acsVariables);
@@ -60,6 +69,19 @@ export default function Legend({ acsVariables }) {
             <span className="legend-label">{bin.label}</span>
           </div>
         ))}
+        {hasNoData && (
+          <div className="legend-row">
+            <span
+              className="legend-swatch"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(45deg, rgba(0,0,0,0.35) 0, rgba(0,0,0,0.35) 4px, transparent 4px, transparent 8px)",
+                border: "1px solid #000",
+              }}
+            />
+            <span className="legend-label">Not Enough Data</span>
+          </div>
+        )}
       </div>
     </div>
   );

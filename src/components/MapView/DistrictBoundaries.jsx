@@ -25,9 +25,11 @@ export default function DistrictBoundaries({ selectedDistrict }) {
       const isSelected = selectedStr && dist === selectedStr;
 
       return {
-        weight: isSelected ? 3 : 1,
-        color: isSelected ? "#ff9900" : "#444",
-        fill: false
+        weight: isSelected ? 3 : 1.5,
+        color: "#000",
+        opacity: isSelected ? 1 : 0.5,
+        fillColor: "transparent",
+        fillOpacity: 0,
       };
     },
     [selectedStr]

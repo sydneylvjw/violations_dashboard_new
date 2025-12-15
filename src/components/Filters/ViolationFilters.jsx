@@ -3,7 +3,7 @@ import { useState } from "react";
 import "./filters.css";
 
 // creating filter conditions
-const YEARS = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
+const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
 
 const STATUSES = [
   "CANCELLED", "CLOSED", "COMPLIED, BALANCE DUE", "IN VIOLATION",

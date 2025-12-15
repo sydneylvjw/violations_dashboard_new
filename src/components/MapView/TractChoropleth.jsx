@@ -20,12 +20,22 @@ export default function TractChoropleth({ acsVariables }) {
       data={tractData}
       style={(feature) => {
         const val = feature.properties[activeVar];
-        return {
-          weight: 0.5,
-          color: "#555",
-          fillOpacity: 0.7,
-          fillColor: colorScale(val),
-        };
+        const baseStyle =
+          val === null || val === undefined || Number.isNaN(val)
+            ? {
+                fillColor: "transparent",
+                fillOpacity: 0,
+                dashArray: "2 4",
+                color: "#000",
+                weight: 0.6,
+              }
+            : {
+                fillColor: colorScale(val),
+                fillOpacity: 0.2,
+                color: colorScale(val),
+                weight: 0.5,
+              };
+        return baseStyle;
       }}
       onEachFeature={(feature, layer) => {
         const rawValue = feature.properties[activeVar];

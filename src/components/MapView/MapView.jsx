@@ -10,9 +10,13 @@ import "leaflet/dist/leaflet.css";
 import ViolationFilters from "../Filters/ViolationFilters";
 import TractFilters from "../Filters/TractFilters";
 import DistrictSelector from "../Filters/DistrictSelector";
+import ViolationDetail from "../Insights/ViolationDetail";
+import InsightSummary from "../Insights/InsightSummary";
 
 export default function MapView({ filters, setFilters }) {
   const [violationSummary, setViolationSummary] = useState({});
+  const [selectedViolation, setSelectedViolation] = useState(null);
+  const [filteredCount, setFilteredCount] = useState(0);
   
   return (
     <div className="dashboard">
@@ -21,6 +25,11 @@ export default function MapView({ filters, setFilters }) {
           <h1>Philadelphia Code Violations</h1>
           <p>Filter violations, highlight council districts, and compare ACS indicators.</p>
         </div>
+        <InsightSummary filteredCount={filteredCount} summary={violationSummary} />
+        <ViolationDetail
+          feature={selectedViolation}
+          onClear={() => setSelectedViolation(null)}
+        />
         <DistrictSelector filters={filters} setFilters={setFilters} />
         <TractFilters filters={filters} setFilters={setFilters} />
         <ViolationFilters
@@ -35,6 +44,7 @@ export default function MapView({ filters, setFilters }) {
           center={[39.9526, -75.1652]}
           zoom={11}
           style={{ height: "100vh", width: "100%" }}
+          onClick={() => setSelectedViolation(null)}
         >
           <TileLayer
             url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png?api_key=f9e2d3dc-7b6e-43f4-8ee1-2aa57eb3a037"
@@ -50,6 +60,9 @@ export default function MapView({ filters, setFilters }) {
 
           <ViolationsLayer
             violationFilters={filters.violationFilters}
+            selectedFeature={selectedViolation}
+            onFeatureSelect={setSelectedViolation}
+            onCountChange={setFilteredCount}
             onSummaryChange={setViolationSummary}
           />
 
