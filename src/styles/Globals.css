@@ -1,9 +1,10 @@
-/* Layout for the whole app */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500&family=Playfair+Display:wght@700&display=swap');
+
 body, html, #root {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: Oswald, sans-serif;
+  font-family: "Oswald", sans-serif;
 }
 
 .dashboard {
@@ -12,7 +13,6 @@ body, html, #root {
   width: 100vw;
 }
 
-/* Sidebar */
 .sidebar {
   width: 320px;
   background: #f7f7f7;
@@ -23,11 +23,11 @@ body, html, #root {
 }
 
 .filter-panel {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: white;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: #fff;
   border-radius: 4px;
-  box-shadow: 0 0 2px rgba(0,0,0,0.1);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .filter-panel h3 {
@@ -35,7 +35,6 @@ body, html, #root {
   font-size: 16px;
 }
 
-/* Map area */
 .map-area {
   flex: 1;
   position: relative;
@@ -46,25 +45,25 @@ body, html, #root {
   width: 100%;
 }
 
-/* Simple controls + legend overlay */
-.map-controls, .legend {
+.map-controls,
+.legend {
   position: absolute;
-  z-index: 1000;
-  background: white;
-  padding: 8px 10px;
-  border-radius: 4px;
-  box-shadow: 0 0 3px rgba(0,0,0,0.2);
+  z-index: 400;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 12px;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   font-size: 12px;
 }
 
 .map-controls {
-  top: 10px;
-  right: 10px;
+  top: 14px;
+  right: 14px;
 }
 
 .legend {
-  bottom: 10px;
-  right: 10px;
+  bottom: 14px;
+  right: 14px;
 }
 
 .sidebar select {
@@ -74,4 +73,46 @@ body, html, #root {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.sidebar-header {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-header h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.sidebar-header p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+/* Mobile layout */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100vw;
+    max-height: 45vh;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1.5rem;
+  }
+
+  .map-area {
+    width: 100vw;
+    height: 55vh;
+  }
+
+  .map-area .leaflet-container {
+    height: 55vh;
+    width: 100vw;
+  }
 }

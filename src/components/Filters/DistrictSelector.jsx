@@ -18,17 +18,46 @@ export default function DistrictSelector({ filters, setFilters }) {
     }));
   };
 
+  const clearSelection = () => {
+    setFilters((prev) => ({
+      ...prev,
+      selectedDistrict: null,
+      violationFilters: {
+        ...prev.violationFilters,
+        COUNCILDIST: null,
+      },
+    }));
+  };
+
+  const hasSelection = filters.selectedDistrict != null;
+
   return (
     <div className="filter-panel">
-      <h3>Council District</h3>
-      <select value={filters.selectedDistrict || ""} onChange={handleChange}>
-        <option value="">All districts</option>
-        {DISTRICTS.map((d) => (
-          <option key={d} value={d}>
-            District {d}
-          </option>
-        ))}
-      </select>
+      <header className="filter-header">
+        <div>
+          <h3>Council District</h3>
+          <p>Highlight a council district on the map.</p>
+        </div>
+        {hasSelection && (
+          <button type="button" className="filter-clear" onClick={clearSelection}>
+            Clear
+          </button>
+        )}
+      </header>
+
+      <div className="filter-body">
+        <label className="filter-select-label">
+          Choose District
+          <select value={filters.selectedDistrict || ""} onChange={handleChange}>
+            <option value="">All districts</option>
+            {DISTRICTS.map((d) => (
+              <option key={d} value={d}>
+                District {d}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,8 @@
 // these are the components to render the legend for the map
 // based on the selected acs characteristics
+import { useMemo } from "react";
+import { getLegendBins } from "../../utils/colorScales";
+import acsPanel from "../../data/acs.json";
 
 const ACSVARIABLES = [
   { value: "year", label: "ACS Year" },
@@ -26,58 +29,35 @@ const ACSVARIABLES = [
   { value: "avgHHsizeE", label: "Average Household Size" },
   { value: "ownOccE", label: "Owner Occupied Housing Units" },
   { value: "pctOwnOcc", label: "Percent Owner Occupied Housing Units" },
-  {
-    value: "pctOwnOccZ",
-    label: "Percent Owner Occupied Housing Units (Z-score)"
-  },
+  { value: "pctOwnOccZ", label: "Percent Owner Occupied Housing Units (Z-score)" },
   { value: "ownOccAvgHHsizeE", label: "Owner Occupied Average Household Size" },
   { value: "rentOccE", label: "Renter Occupied Housing Units" },
   { value: "pctRentOcc", label: "Percent Renter Occupied Housing Units" },
-  {
-    value: "pctRentZ",
-    label: "Percent Renter Occupied Housing Units (Z-score)"
-  },
+  { value: "pctRentZ", label: "Percent Renter Occupied Housing Units (Z-score)" },
   { value: "rentOccAvgHHsizeE", label: "Renter Occupied Average Household Size" },
-  {
-    value: "medSMOCAPIE",
-    label:
-      "Median Selected Monthly Owner Costs as a Percentage of Household Income"
-  },
-  {
-    value: "medGRAPIE",
-    label: "Median Gross Rent as a Percentage of Household Income"
-  }
+  { value: "medSMOCAPIE", label: "Median Selected Monthly Owner Costs as a Percentage of Household Income" },
+  { value: "medGRAPIE", label: "Median Gross Rent as a Percentage of Household Income" }
 ];
-
-import { getLegendBins } from "../../utils/colorScales";
-import { useMemo } from "react";
 
 
 export default function Legend({ acsVariables }) {
-  const bins = useMemo(() => getLegendBins(acsVariables), [acsVariables]);
-
-
+  const bins = useMemo(
+    () => getLegendBins(acsVariables, acsPanel.features),
+    [acsVariables]
+  );
   if (!bins.length) return null;
 
   const selected = ACSVARIABLES.find((v) => v.value === acsVariables);
   const selectedLabel = selected ? selected.label : acsVariables;
 
   return (
-    <div className="legend">
-      <strong>{selectedLabel}</strong>
-      <div>
+    <div className="legend-card">
+      <div className="legend-title">{selectedLabel}</div>
+      <div className="legend-scale">
         {bins.map((bin, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center" }}>
-            <span
-              style={{
-                width: 16,
-                height: 12,
-                background: bin.color,
-                marginRight: 6,
-                border: "1px solid #999"
-              }}
-            />
-            <span>{bin.label}</span>
+          <div className="legend-row" key={i}>
+            <span className="legend-swatch" style={{ backgroundColor: bin.color }} />
+            <span className="legend-label">{bin.label}</span>
           </div>
         ))}
       </div>

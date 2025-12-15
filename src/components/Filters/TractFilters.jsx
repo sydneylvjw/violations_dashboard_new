@@ -64,17 +64,24 @@ export default function TractFilters({ filters, setFilters }) {
 
   return (
     <div className="filter-panel">
-      <h3>Neighborhood characteristics</h3>
-      <label>
-        ACS Variable:
-        <select value={filters.acsVariables} onChange={handleChange}>
-          {ACSVARIABLES.map((v) => (
-            <option key={v.value} value={v.value} title={v.label}>
-              {v.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <header className="filter-header">
+        <div>
+          <h3>Neighborhood Characteristics</h3>
+          <p>Swap ACS indicators to recolor the tract choropleth.</p>
+        </div>
+      </header>
+      <div className="filter-body">
+        <label className="filter-select-label">
+          ACS Variable
+          <select value={filters.acsVariables} onChange={handleChange}>
+            {ACSVARIABLES.map((v) => (
+              <option key={v.value} value={v.value} title={v.label}>
+                {v.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
     </div>
   );
 }

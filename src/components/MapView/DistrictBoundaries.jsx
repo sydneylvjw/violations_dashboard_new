@@ -2,19 +2,11 @@
 
 import { GeoJSON } from "react-leaflet";
 import councilDistricts from "../../data/Council_Districts_2024.json";
-const response = await fetch("/data/inspectPanel.json");
-const inspectDistricts = await response.json();
 import { useMemo } from "react";
+import inspectDistricts from "../../data/LI_DISTRICTS.json";
+
 
 export default function DistrictBoundaries({ selectedDistrict }) {
-  // // combine both district datasets
-  // const districtData = {
-  //   type: "FeatureCollection",
-  //   features: [
-  //     ...councilDistricts.features,
-  //     ...inspectDistricts.features
-  //   ]
-  // };
   const mergedData = useMemo(() => {
     const features = [];
     if (councilDistricts?.features) features.push(...councilDistricts.features);
@@ -54,36 +46,3 @@ export default function DistrictBoundaries({ selectedDistrict }) {
     />
   );
 }
-
-//   const style = (feature) => {
-//     const districtProp = feature.properties.DISTRICT;
-//     const selectedStr =
-//       selectedDistrict != null ? String(selectedDistrict) : null;
-
-//     const isSelected =
-//       selectedStr && districtProp === selectedStr;
-
-//     return {
-//       color: isSelected ? "#ffcc00" : "#555555",
-//       weight: isSelected ? 3 : 1,
-//       fillOpacity: 0,
-//       dashArray: "4"
-//     };
-//   };
-
-//   const onEachFeature = (feature, layer) => {
-//     const districtProp = feature.properties.DISTRICT;
-//     layer.bindTooltip(
-//       `District ${districtProp}`,
-//       { sticky: true }
-//     );
-//   };
-
-//   return (
-//     <GeoJSON
-//       data={districtData}
-//       style={style}
-//       onEachFeature={onEachFeature}
-//     />
-//   );
-// }

@@ -1,168 +1,191 @@
 // these are the components to render filterable code violation markers on the map
-
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GeoJSON } from "react-leaflet";
 import L from "leaflet";
-const response = await fetch("/data/inspectPanel.json");
-const inspectPanel = await response.json();
-const response2 = await fetch("/data/councilPanel.json");
-const councilPanel = await response2.json();
-const response3 = await fetch("/data/tractPanel.json");
-const tractPanel = await response3.json();
+
+//  defining features to create a gradient for each filter
+const FILTER_COLORS = {
+  YEARS: "#c1cbaf",
+  STATUSES: "#9daaa0",
+  INSPECTDIST: "#664d50",
+  RESOLUTIONCODE: "#b26c62",
+  PRIORITY: "#cec073",
+};
 
 
-export default function ViolationsLayer({ violationFilters }) {
+// man rendering function
+export default function ViolationsLayer({ violationFilters, onSummaryChange }) {
+
   const vf = violationFilters || {};
+  const yearsFilter = Array.isArray(vf.YEARS) ? vf.YEARS : [];
+  const statusesFilter = Array.isArray(vf.STATUSES) ? vf.STATUSES : [];
+  const inspectFilter = Array.isArray(vf.INSPECTDIST) ? vf.INSPECTDIST : [];
+  const resolutionFilter = Array.isArray(vf.RESOLUTIONCODE) ? vf.RESOLUTIONCODE : [];
+  const priorityFilter = Array.isArray(vf.PRIORITY) ? vf.PRIORITY : [];
+  const councilFilter = vf.COUNCILDIST ?? null;
+
 
   // 1. Merge all panels ONCE (static data)
-  const allFeatures = useMemo(() => {
-    const features = [];
-    if (councilPanel?.features) features.push(...councilPanel.features);
-    if (inspectPanel?.features) features.push(...inspectPanel.features);
-    if (tractPanel?.features) features.push(...tractPanel.features);
-    return features;
-  }, []); // data doesn't change at runtime
+  const [allFeatures, setAllFeatures] = useState([]);
+
+
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/violations_small.json")
+      .then((res) => res.json())
+      .then((fc) => {
+        if (!cancelled) setAllFeatures(fc.features ?? []);
+      })
+      .catch((err) => console.error("Failed to load violations_small.json", err));
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // 2. Apply filters
+
   const filteredFeatures = useMemo(() => {
-    const YEARS = vf.YEARS; // number or null
-    const STATUSES = Array.isArray(vf.STATUSES) ? vf.STATUSES : [];
-    const INSPECTDIST = vf.INSPECTDIST || null;
-    const RESOLUTIONCODE = vf.RESOLUTIONCODE || null;
-    const PRIORITY = vf.PRIORITY || null;
-    const COUNCILDIST = vf.COUNCILDIST || null;
-
-    // DEBUG: what filters does this layer actually see?
-    console.log("ViolationsLayer filters:", {
-      YEARS,
-      STATUSES,
-      INSPECTDIST,
-      RESOLUTIONCODE,
-      PRIORITY,
-      COUNCILDIST,
-    });
-
-    const result = allFeatures.filter((feature) => {
+    return allFeatures.filter((feature) => {
       const props = feature.properties || {};
 
-      // Copy these out for debugging
-      const year = props.violation_year;
-      const dist = props.inspect_district;
+      const yearValue = Number(props.violation_year);
+      if (
+        yearsFilter.length && !yearsFilter.includes(Number.isNaN(yearValue) ? null : yearValue)
+      ) return false;
 
-      if (YEARS != null && INSPECTDIST) {
-        if (!(String(year) === String(YEARS) &&
-              dist &&
-              dist.toString().trim().toUpperCase() ===
-                INSPECTDIST.toString().trim().toUpperCase())) {
-          // This feature fails combined year + district, so it should be excluded
-          // but if we see it on the map, then our popup is reading from a different source.
-          return false;
-        }
-      } else {
-        // original individual checks
-        if (YEARS != null) {
-          if (String(year) !== String(YEARS)) return false;
-        }
-        if (INSPECTDIST) {
-          if (
-            !dist ||
-            dist.toString().trim().toUpperCase() !==
-              INSPECTDIST.toString().trim().toUpperCase()
-          ) {
-            return false;
-          }
-        }
-      }
 
-  // ...other checks (STATUSES, COUNCILDIST, RESOLUTIONCODE, PRIORITY)...
-
-      // Year filter (string-safe)
-      // if (YEARS != null) {
-      //   const year = props.violation_year;
-      //   if (String(year) !== String(YEARS)) return false;
-      // }
-
-      // Statuses (multi-select)
-      if (STATUSES.length) {
-        const status = props.casestatus;
-        if (!STATUSES.includes(String(status))) return false;
-      }
-
-      // Council district (from DistrictSelector)
-      if (COUNCILDIST != null) {
-        const cd = props.council_district;
-        if (String(cd) !== String(COUNCILDIST)) return false;
-      }
-
-      // L&I inspection district (location)
-      if (INSPECTDIST) {
-        const dist = props.inspect_district;
-        if (
-          !dist ||
-          dist.toString().trim().toUpperCase() !==
-            INSPECTDIST.toString().trim().toUpperCase()
-        ) {
-          return false;
-        }
-      }
-
-      // Resolution code
-      if (RESOLUTIONCODE) {
-        const code = props.violationresolutioncode;
-        if (String(code) !== String(RESOLUTIONCODE)) return false;
-      }
-
-      // Priority
-      if (PRIORITY) {
-        const priority = props.caseprioritydesc;
-        if (String(priority) !== String(PRIORITY)) return false;
-      }
-
+      if (statusesFilter.length && !statusesFilter.includes(String(props.casestatus))) return false;
+      if (inspectFilter.length && !inspectFilter.includes(String(props.inspect_district))) return false;
+      if (councilFilter != null && String(props.council_district) !== String(councilFilter)) return false;
+      if (resolutionFilter.length && !resolutionFilter.includes(String(props.violationresolutioncode))) return false;
+      if (priorityFilter.length && !priorityFilter.includes(String(props.caseprioritydesc))) return false;
       return true;
     });
-
-    // DEBUG: counts
-    console.log(
-      "ViolationsLayer counts:",
-      "total =", allFeatures.length,
-      "filtered =", result.length
-    );
-
-    return result;
   }, [
     allFeatures,
-    vf.YEARS,
-    vf.STATUSES,
-    vf.INSPECTDIST,
-    vf.RESOLUTIONCODE,
-    vf.PRIORITY,
-    vf.COUNCILDIST,
+    yearsFilter,
+    statusesFilter,
+    inspectFilter,
+    resolutionFilter,
+    priorityFilter,
+    councilFilter,
   ]);
 
-  // 3. Render markers from filteredFeatures (cap for performance)
+
+  // summary count effect
+ useEffect(() => {
+    if (typeof onSummaryChange !== "function") return;
+
+    const buildCounts = (field, selectedValues) => {
+      if (!selectedValues?.length) return null;
+      return selectedValues.map((value) => {
+        const count = filteredFeatures.filter((feat) => {
+          const prop = feat.properties?.[field];
+          return String(prop) === String(value);
+        }).length;
+        return { value, count };
+      });
+    };
+
+     const summary = {};
+    const yearCounts = buildCounts("violation_year", yearsFilter);
+    if (yearCounts) summary.YEARS = yearCounts;
+    const statusCounts = buildCounts("casestatus", statusesFilter);
+    if (statusCounts) summary.STATUSES = statusCounts;
+    const inspectCounts = buildCounts("inspect_district", inspectFilter);
+    if (inspectCounts) summary.INSPECTDIST = inspectCounts;
+    const resolutionCounts = buildCounts("violationresolutioncode", resolutionFilter);
+    if (resolutionCounts) summary.RESOLUTIONCODE = resolutionCounts;
+    const priorityCounts = buildCounts("caseprioritydesc", priorityFilter);
+    if (priorityCounts) summary.PRIORITY = priorityCounts;
+
+    onSummaryChange(summary);
+  }, [
+    filteredFeatures,
+    yearsFilter,
+    statusesFilter,
+    inspectFilter,
+    resolutionFilter,
+    priorityFilter,
+    onSummaryChange,
+  ]);
+
   const filtered = useMemo(
     () => ({
       type: "FeatureCollection",
-      features: filteredFeatures.slice(0, 2000),
+      features: filteredFeatures.slice(0, 25000),
     }),
     [filteredFeatures]
   );
 
-  const pointToLayer = (feature, latlng) =>
+const pointToLayer = (feature, latlng) => {
+  const layers = [];
+
+  // base halo
+  layers.push(
     L.circleMarker(latlng, {
-      radius: 2,
-      fillColor: "#E04833",
-      color: "#E04833",
-      weight: 0.5,
+      radius: 7,
+      fillColor: "rgba(17,24,39,0.35)",
+      color: "rgba(249,115,22,0.25)",
+      weight: 1,
       opacity: 1,
+      fillOpacity: 0.6,
+    })
+  );
+
+  // core marker
+  layers.push(
+    L.circleMarker(latlng, {
+      radius: 4.5,
+      fillColor: "#111827",
+      color: "#f97316",
+      weight: 1.4,
+      opacity: 1,
+      fillOpacity: 0.95,
+    })
+  );
+
+  const rings = [
+    yearsFilter.length && FILTER_COLORS.YEARS,
+    statusesFilter.length && FILTER_COLORS.STATUSES,
+    inspectFilter.length && FILTER_COLORS.INSPECTDIST,
+    resolutionFilter.length && FILTER_COLORS.RESOLUTIONCODE,
+    priorityFilter.length && FILTER_COLORS.PRIORITY,
+  ].filter(Boolean);
+
+  rings.forEach((color, idx) => {
+    layers.push(
+      L.circleMarker(latlng, {
+        radius: Math.max(1.2, 3.6 - idx * 0.6),
+        fillColor: color,
+        color,
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.95,
+      })
+    );
+  });
+
+  // inner dot
+  layers.push(
+    L.circleMarker(latlng, {
+      radius: 1.2,
+      fillColor: "#fff",
+      color: "transparent",
+      opacity: 0.9,
       fillOpacity: 0.9,
-    });
+    })
+  );
+
+  return L.featureGroup(layers);
+};
 
   const onEachFeature = (feature, layer) => {
     const p = feature.properties || {};
     layer.bindPopup(
-      `<div>ACTIVE LAYER</div>
-      <strong>${p.address || "Unknown address"}</strong><br/>
+      `<div><strong>Property Information</strong></div>
        Year Filed: ${p.violation_year ?? "N/A"}<br/>
        Council District: ${p.council_district ?? "N/A"}<br/>
        L&I Inspection District: ${p.inspect_district ?? "N/A"}<br/>
@@ -173,19 +196,103 @@ export default function ViolationsLayer({ violationFilters }) {
        Subcode: ${p.subcode ?? "N/A"}<br/>
        Violation Class: ${p.viol_class ?? "N/A"}<br/>`
     );
-        layer.bindPopup(
-      `<div>ACTIVE LAYER</div>
-      <strong>${p.address || "Unknown address"}</strong><br/>
-      Year Filed: ${p.violation_year ?? "N/A"}<br/>
-      ...`
-    );
   };
 
   return (
     <GeoJSON
+      key={`violations-${filteredFeatures.length}`}
       data={filtered}
       pointToLayer={pointToLayer}
       onEachFeature={onEachFeature}
     />
   );
 }
+
+  
+//   const summary = {};
+//   const yearCounts = buildCounts("violation_year", vf.YEARS);
+//   if (yearCounts) summary.YEARS = yearCounts;
+//   const statusCounts = buildCounts("casestatus", vf.STATUSES);
+//   if (statusCounts) summary.STATUSES = statusCounts;
+//   const inspectCounts = buildCounts("inspect_district", vf.INSPECTDIST);
+//   if (inspectCounts) summary.INSPECTDIST = inspectCounts;
+//   const resolutionCounts = buildCounts("violationresolutioncode", vf.RESOLUTIONCODE);
+//   if (resolutionCounts) summary.RESOLUTIONCODE = resolutionCounts;
+//   const priorityCounts = buildCounts("caseprioritydesc", vf.PRIORITY);
+//   if (priorityCounts) summary.PRIORITY = priorityCounts;
+
+//   onSummaryChange(summary);
+// }, [filteredFeatures, vf, onSummaryChange]);
+
+
+//   // 3. Render markers from filteredFeatures (cap for performance)
+//   const filtered = useMemo(
+//     () => ({
+//       type: "FeatureCollection",
+//       features: filteredFeatures.slice(0, 25000),
+//     }),
+//     [filteredFeatures]
+//   );
+
+// const pointToLayer = (feature, latlng) => {
+//   const layers = [];
+//   layers.push(
+//     L.circleMarker(latlng, {
+//       radius: 4,
+//       fillColor: "#E04833",
+//       color: "#E04833",
+//       weight: 0.5,
+//       opacity: 1,
+//       fillOpacity: 0.9,
+//     })
+//   );
+
+//   const rings = [
+//     yearsFilter.length && FILTER_COLORS.YEARS,
+//     statusesFilter.length && FILTER_COLORS.STATUSES,
+//     inspectFilter.length && FILTER_COLORS.INSPECTDIST,
+//     resolutionFilter.length && FILTER_COLORS.RESOLUTIONCODE,
+//     priorityFilter.length && FILTER_COLORS.PRIORITY,
+//   ].filter(Boolean);
+
+//   rings.forEach((color, idx) => {
+//     layers.push(
+//       L.circleMarker(latlng, {
+//         radius: Math.max(1.5, 4 - (idx + 1) * 0.6),
+//         fillColor: color,
+//         color,
+//         weight: 1,
+//         fillOpacity: 1,
+//         opacity: 1,
+//       })
+//     );
+//   });
+//   return L.layerGroup(layers);
+// };  
+
+// const onEachFeature = (feature, layer) => {
+//     const p = feature.properties || {};
+//     layer.bindPopup(
+//       `<div><strong>Property Information</strong></div>
+//       <div class="popup-filters">${vf.STATUSES?.join(", ") || "All statuses"}</div>
+//       Year Filed: ${p.violation_year ?? "N/A"}<br/>
+//       Council District: ${p.council_district ?? "N/A"}<br/>
+//       L&I Inspection District: ${p.inspect_district ?? "N/A"}<br/>
+//       Tract: ${p.censustract ?? "N/A"}<br/>
+//       Case Status: ${p.casestatus ?? "N/A"}<br/>
+//       Priority: ${p.caseprioritydesc ?? "N/A"}<br/>
+//       Violation Resolution Status: ${p.violationresolutioncode ?? "N/A"}<br/>
+//       Subcode: ${p.subcode ?? "N/A"}<br/>
+//       Violation Class: ${p.viol_class ?? "N/A"}<br/>`
+//     );
+//   };
+
+//   return (
+//     <GeoJSON
+//       key={`violations-${filteredFeatures.length}`}
+//       data={filtered}
+//       pointToLayer={pointToLayer}
+//       onEachFeature={onEachFeature}
+//     />
+//   );
+// }

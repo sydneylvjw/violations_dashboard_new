@@ -1,42 +1,61 @@
 // importing map shell components--this is the container for all the map stuff
-
+import { useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import ViolationsLayer from "./ViolationsLayer";
 import TractChoropleth from "./TractChoropleth";
 import DistrictBoundaries from "./DistrictBoundaries";
-import MapControls from "./MapControls";
 import Legend from "./Legend";
 import "./mapView.css";
 import "leaflet/dist/leaflet.css";
+import ViolationFilters from "../Filters/ViolationFilters";
+import TractFilters from "../Filters/TractFilters";
+import DistrictSelector from "../Filters/DistrictSelector";
 
-export default function MapView({ filters }) {
+export default function MapView({ filters, setFilters }) {
+  const [violationSummary, setViolationSummary] = useState({});
+  
   return (
-    <MapContainer
-      center={[39.9526, -75.1652]} // Philadelphia
-      zoom={11}
-      style={{ height: "100vh", width: "100%" }}
-    >
-      {/* Basemap */}
-      <TileLayer
-        url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png?api_key=f9e2d3dc-7b6e-43f4-8ee1-2aa57eb3a037"
-        attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
-      />
+    <div className="dashboard">
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h1>Philadelphia Code Violations</h1>
+          <p>Filter violations, highlight council districts, and compare ACS indicators.</p>
+        </div>
+        <DistrictSelector filters={filters} setFilters={setFilters} />
+        <TractFilters filters={filters} setFilters={setFilters} />
+        <ViolationFilters
+          filters={filters}
+          setFilters={setFilters}
+          summary={violationSummary}
+        />
+      </div>
 
-      {/* ACS choropleth for selected variable */}
-      <TractChoropleth
-        acsVariables={filters.acsVariables}
-        tractFilters={filters.tractFilters}
-      />
+      <div className="map-area">
+        <MapContainer
+          center={[39.9526, -75.1652]}
+          zoom={11}
+          style={{ height: "100vh", width: "100%" }}
+        >
+          <TileLayer
+            url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png?api_key=f9e2d3dc-7b6e-43f4-8ee1-2aa57eb3a037"
+            attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
+          />
 
-      {/* District boundaries */}
-      <DistrictBoundaries selectedDistrict={filters.selectedDistrict} />
+          <TractChoropleth
+            acsVariables={filters.acsVariables}
+            tractFilters={filters.tractFilters}
+          />
 
-      {/* Code violations */}
-      <ViolationsLayer violationFilters={filters.violationFilters} />
+          <DistrictBoundaries selectedDistrict={filters.selectedDistrict} />
 
-      {/* Controls + Legend */}
-      {/* <MapControls /> */}
-      <Legend acsVariables={filters.acsVariables} /> 
-    </MapContainer>
+          <ViolationsLayer
+            violationFilters={filters.violationFilters}
+            onSummaryChange={setViolationSummary}
+          />
+
+          <Legend acsVariables={filters.acsVariables} />
+        </MapContainer>
+      </div>
+    </div>
   );
 }
