@@ -2,26 +2,26 @@
 
 export default function InsightSummary({ filteredCount = 0, summary = {} }) {
   const hazardCount =
-    summary.PRIORITY?.find(({ value }) => value === "HAZARDOUS")?.count ?? 0;
+    summary.PRIORITY?.find(({ value }) => value === "IMMINENTLY DANGEROUS")?.count ?? 0;
   const openCount =
-    summary.STATUSES?.find(({ value }) => value === "IN VIOLATION")?.count ?? 0;
+    summary.STATUSES?.find(({ value }) => value === null)?.count ?? 0;
   const busyDistrict = summary.INSPECTDIST
     ? [...summary.INSPECTDIST].sort((a, b) => b.count - a.count)[0]
     : null;
 
   const cards = [
     {
-      label: "Filtered violations",
+      label: "Filtered Violations",
       value: filteredCount.toLocaleString(),
       sublabel: "records in current view",
     },
     {
-      label: "Hazardous cases",
+      label: "Imminently Dangerous Cases",
       value: hazardCount.toLocaleString(),
       sublabel: "flagged as hazardous",
     },
     {
-      label: "Open violations",
+      label: "Open Violations",
       value: openCount.toLocaleString(),
       sublabel: "still in violation",
     },
