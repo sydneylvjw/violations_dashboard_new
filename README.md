@@ -10,9 +10,9 @@ Clicking on an individual violation will populate the key performance indicators
 
 # Data Sources
 Violation and district data was sourced from (OpenDataPhilly)[opendataphilly.org]:
-**City Council Districts (2024)**: https://opendataphilly.org/datasets/city-council-districts/
-**Licenses & Inspections Districts (pre-2014)**: https://opendataphilly.org/datasets/licenses-and-inspections-districts/
-**Code violations**: https://opendataphilly.org/datasets/licenses-and-inspections-code-violations/
+- **City Council Districts (2024)**: https://opendataphilly.org/datasets/city-council-districts/
+- **Licenses & Inspections Districts (pre-2014)**: https://opendataphilly.org/datasets/licenses-and-inspections-districts/
+- **Code violations**: https://opendataphilly.org/datasets/licenses-and-inspections-code-violations/
 
 ### Note
 ChatGPT was used to assist with the build and styling of this dashboard.
