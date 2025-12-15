@@ -32,7 +32,7 @@ export default function ViolationsLayer({ violationFilters, onSummaryChange }) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/data/violations_small.json")
+    fetch("https://media.githubusercontent.com/media/sydneylvjw/violations-data-lfs/main/data/violations_small.json")
       .then((res) => res.json())
       .then((fc) => {
         if (!cancelled) setAllFeatures(fc.features ?? []);
