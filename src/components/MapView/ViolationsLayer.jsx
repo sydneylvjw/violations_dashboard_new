@@ -12,25 +12,9 @@ const FILTER_COLORS = {
   PRIORITY: "#cec073",
 };
 
-const getFeatureKey = (feature) => {
-  if (!feature) return null;
-  const coords = Array.isArray(feature.geometry?.coordinates)
-    ? feature.geometry.coordinates.join(",")
-    : "";
-  const address = feature.properties?.address ?? "";
-  const year = feature.properties?.violation_year ?? "";
-  return `${coords}|${year}|${address}`;
-};
-
 
 // man rendering function
-export default function ViolationsLayer({
-  violationFilters,
-  onSummaryChange,
-  onFeatureSelect,
-  onCountChange,
-  selectedFeature,
-}) {
+export default function ViolationsLayer({ violationFilters, onSummaryChange }) {
 
   const vf = violationFilters || {};
   const yearsFilter = Array.isArray(vf.YEARS) ? vf.YEARS : [];
@@ -91,7 +75,7 @@ export default function ViolationsLayer({
 
 
   // summary count effect
-useEffect(() => {
+ useEffect(() => {
     if (typeof onSummaryChange !== "function") return;
 
     const buildCounts = (field, selectedValues) => {
@@ -128,12 +112,6 @@ useEffect(() => {
     onSummaryChange,
   ]);
 
-  useEffect(() => {
-    if (typeof onCountChange === "function") {
-      onCountChange(filteredFeatures.length);
-    }
-  }, [filteredFeatures, onCountChange]);
-
   const filtered = useMemo(
     () => ({
       type: "FeatureCollection",
@@ -142,41 +120,30 @@ useEffect(() => {
     [filteredFeatures]
   );
 
-  const selectedKey = getFeatureKey(selectedFeature);
-
 const pointToLayer = (feature, latlng) => {
-  const featureKey = getFeatureKey(feature);
-  const isSelected = selectedKey && selectedKey === featureKey;
-
-  if (selectedKey && !isSelected) {
-    return null;
-  }
-
   const layers = [];
-  const baseRadius = 5;
-  const fadedOpacity = 1;
 
   // base halo
   layers.push(
     L.circleMarker(latlng, {
-      radius: baseRadius + 2,
+      radius: 7,
       fillColor: "rgba(17,24,39,0.35)",
       color: "rgba(249,115,22,0.25)",
       weight: 1,
-      opacity: fadedOpacity,
-      fillOpacity: 0.5 * fadedOpacity,
+      opacity: 1,
+      fillOpacity: 0.6,
     })
   );
 
   // core marker
   layers.push(
     L.circleMarker(latlng, {
-      radius: baseRadius,
+      radius: 4.5,
       fillColor: "#111827",
       color: "#f97316",
-      weight: isSelected ? 1.6 : 1,
-      opacity: isSelected ? 1 : fadedOpacity,
-      fillOpacity: isSelected ? 0.95 : 0.9 * fadedOpacity,
+      weight: 1.4,
+      opacity: 1,
+      fillOpacity: 0.95,
     })
   );
 
@@ -191,12 +158,12 @@ const pointToLayer = (feature, latlng) => {
   rings.forEach((color, idx) => {
     layers.push(
       L.circleMarker(latlng, {
-        radius: Math.max(1.2, (isSelected ? 4.2 : 3) - idx * 0.6),
+        radius: Math.max(1.2, 3.6 - idx * 0.6),
         fillColor: color,
         color,
         weight: 1,
-        opacity: fadedOpacity,
-        fillOpacity: 0.9 * fadedOpacity,
+        opacity: 1,
+        fillOpacity: 0.95,
       })
     );
   });
@@ -204,28 +171,41 @@ const pointToLayer = (feature, latlng) => {
   // inner dot
   layers.push(
     L.circleMarker(latlng, {
-      radius: isSelected ? 1.5 : 1,
-      fillColor: isSelected ? "#fff" : "#f97316",
+      radius: 1.2,
+      fillColor: "#fff",
       color: "transparent",
-      opacity: fadedOpacity,
-      fillOpacity: fadedOpacity,
+      opacity: 0.9,
+      fillOpacity: 0.9,
     })
   );
 
   return L.featureGroup(layers);
 };
 
-  const onEachFeature = (feature, layer) => {
+  const onEachFeature = (feature, layer, onFeatureSelect) => {
     const p = feature.properties || {};
+    layer.bindPopup(
+      `<div><strong>Property Information</strong></div>
+       Year Filed: ${p.violation_year ?? "N/A"}<br/>
+       Council District: ${p.council_district ?? "N/A"}<br/>
+       L&I Inspection District: ${p.inspect_district ?? "N/A"}<br/>
+       Tract: ${p.censustract ?? "N/A"}<br/>
+       Case Status: ${p.casestatus ?? "N/A"}<br/>
+       Priority: ${p.caseprioritydesc ?? "N/A"}<br/>
+       Violation Resolution Status: ${p.violationresolutioncode ?? "N/A"}<br/>
+       Subcode: ${p.subcode ?? "N/A"}<br/>
+       Violation Class: ${p.viol_class ?? "N/A"}<br/>`
+    );
+
     if (typeof onFeatureSelect === "function") {
       layer.on("click", () => onFeatureSelect(feature));
-    }
-    layer.on("popupopen", () => layer.closePopup());
+    } 
   };
+
 
   return (
     <GeoJSON
-      key={`violations-${filteredFeatures.length}-${selectedKey ?? "none"}`}
+      key={`violations-${filteredFeatures.length}`}
       data={filtered}
       pointToLayer={pointToLayer}
       onEachFeature={onEachFeature}
