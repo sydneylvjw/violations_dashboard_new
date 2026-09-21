@@ -1,25 +1,40 @@
 # Overview
-This dashboard displays Philadelphia's residential housing code violations that were issued between 2013 and 2024. The purpose of this app is to provide city councilmembers with a visual representation of housing condition issues within their district so they can target areas for assistace and rehabilitation resources.
+This dashboard was created as a visual tool to see the spatial distribution of residential code enforcement implementation.The violations, represented by the point markers, are overlaid on top of ACS tract-level data. A KPI panel populates pertinent information about the filtered violation as the user adjusts their view.
 
-# Usage
-Users can opt to filter down by council district or violations city-wide. From there, they can choose which neighborhood characteristic is displayed at the census tract level--a legend will populate in the lower right of the map. 
+# Instructions
+The user can filter the violations by location, year, type, status, priority, council district, and L&I enforcement district. They also have the option to switch between several ACS metrics, including data on income, poverty, standardized concentration of different racial groups, and housing costs.
 
-The Code Violations filters allow you to select one or multiple years, case statuses, L&I Inspection Districts, case resolution description, and priority. As the user navigates through the filters, a KPI panel at the top of the sidebar will populate providing more detailed information about your filter results. 
 
-Clicking on an individual violation will populate the key performance indicators (KPI) widget at the top of the sidebar. To remove any filters, simply click "Clear" (for council district) or "Clear All" (for filters). 
+# Data
+The following data was sourced from the City of Philadelphia via [OpenDataPhilly](www.opendataphilly.org):
+- **Violations**: (https://opendataphilly.org/datasets/licenses-and-inspections-code-violations/)
+- **2014 L&I Districts**: (https://opendataphilly.org/datasets/licenses-and-inspections-districts/)
+- **2024 Council Districts**: (https://opendataphilly.org/datasets/city-council-districts/)
 
-# Data Sources
-Violation and district data was sourced from (OpenDataPhilly)[opendataphilly.org]:
-- **City Council Districts (2024)**: https://opendataphilly.org/datasets/city-council-districts/
-- **Licenses & Inspections Districts (pre-2014)**: https://opendataphilly.org/datasets/licenses-and-inspections-districts/
-- **Code violations**: https://opendataphilly.org/datasets/licenses-and-inspections-code-violations/
+Neighborhood characteristics were pulled from the United States Census 2023 ACS 5-Year Survey. 
 
-### Note
-ChatGPT was used to assist with the build and styling of this dashboard.
+This dashboard is a part of a larger project examining residential code enforcement practices across Philadelphia. Feel free to reach out with any questions, comments, or suggestions. 
 
-### Contact
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+# Contact
 Sydney Jones, MCP/MUSA '27
 University of Pennsylvania Weitzman School of Design
-**Email**: sydneyjw@upenn.edu
+[sydneyjw@upenn.edu](mailto: sydneyjw@upenn.edu)
 
-This project was created for MUSA 6110, and is a part of a larger project I am working on looking the impact of residential code violations on Philadelphians. Please (reach out)[mailto: sydneyjw@upenn.edu] if you would like to learn more. 
+**Note**: ChatGPT was used to assist with the technical development of this project. 
